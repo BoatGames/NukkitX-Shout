@@ -1,0 +1,11 @@
+name: UIShout
+main: org.sobadfish.shout.ShoutPlugin
+version: 1.0.0
+api: 1.0.12
+author: Sobadfish
+commands:
+  shout:
+    description: "切换喊话UI"
+    permission: default
+
+load: POSTWORLD

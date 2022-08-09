@@ -1,0 +1,34 @@
+{
+  "msg": {
+    "title": "喊话系统操作提示",
+    "subTitle": "&e喊话前使用\"&6/shout money\" &e来查看相关费用",
+    "input": "请输入想要喊话的内容",
+    "chose": {
+      "title": "喊话内容显示的颜色",
+      "list": [
+        "无色彩",
+        "自定义",
+        "&d随机颜色"
+      ]
+    },
+    "chose1": {
+      "title": "请选择喊话显示方式",
+      "list": [
+        "Msg",
+        "Tip",
+        "Popup",
+        "Title"
+      ]
+    }
+
+  },
+  "money": 1,
+  "rate": {
+    "msg": 1,
+    "custom": 2,
+    "random": 2.2
+  }
+
+}
+
+
