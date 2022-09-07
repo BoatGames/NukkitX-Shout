@@ -116,7 +116,7 @@ public class ShoutPlugin extends PluginBase implements Listener {
             });
             socketManager.setDataListener((socketManager, messageData) -> {
                 MsgBroadcastData data = messageData.getData(MsgBroadcastData.class);
-                broadcastMessage(data.msg,data.type);
+                broadcastMessage(messageData,data.type);
             });
         }
 
@@ -129,22 +129,30 @@ public class ShoutPlugin extends PluginBase implements Listener {
     public static class MsgBroadcastData{
         public String msg;
 
+        public String player;
+
         public String type;
     }
 
-    public void broadcastMessage(String msg,String type){
+    public void broadcastMessage(SocketManager.MessageData msg, String type){
+        MsgBroadcastData data = msg.getData(MsgBroadcastData.class);
+        String display = ShoutPlugin.getShoutPlugin().getConfig().getString("msg");
+        display = display.replace("${ip}",msg.name)
+                .replace("${name}",data.player)
+                .replace("${msg}", data.msg);
+        final String s = display;
         switch (type.toLowerCase()){
             case "msg":
-                Server.getInstance().broadcastMessage(TextFormat.colorize('&',msg));
+                Server.getInstance().broadcastMessage(TextFormat.colorize('&',s));
                 break;
             case "tip":
-                Server.getInstance().getOnlinePlayers().values().forEach(player1 -> player1.sendTip(TextFormat.colorize('&',msg)));
+                Server.getInstance().getOnlinePlayers().values().forEach(player1 -> player1.sendTip(TextFormat.colorize('&',s)));
                 break;
             case "popup":
-                Server.getInstance().getOnlinePlayers().values().forEach(player1 -> player1.sendPopup(TextFormat.colorize('&',msg)));
+                Server.getInstance().getOnlinePlayers().values().forEach(player1 -> player1.sendPopup(TextFormat.colorize('&',s)));
                 break;
             case "title":
-                Server.getInstance().getOnlinePlayers().values().forEach(player1 -> player1.sendTitle(TextFormat.colorize('&',msg)));
+                Server.getInstance().getOnlinePlayers().values().forEach(player1 -> player1.sendTitle(TextFormat.colorize('&',s)));
                 break;
             default:break;
         }
@@ -207,15 +215,20 @@ public class ShoutPlugin extends PluginBase implements Listener {
                 }else{
                     player.sendMessage(TextFormat.colorize('&',TITLE+" &4您的金钱不足"));
                 }
+                MsgBroadcastData data1 = new MsgBroadcastData();
+                data1.msg = msg;
+                data1.player = player.getName();
+                data1.type = data.type;
                 if(socketManager != null){
-                    MsgBroadcastData data1 = new MsgBroadcastData();
-                    data1.msg = msg;
-                    data1.type = data.type;
                     socketManager.sendMessage(data1);
 
                 }
                 if(socketManager == null || !socketManager.enable || socketManager.getType() == SocketManager.SocketType.SERVER){
-                    broadcastMessage(msg,data.type);
+                    SocketManager.MessageData mdata = new SocketManager.MessageData();
+                    Gson gson = new Gson();
+                    mdata.name = getConfig().getString("server.name");
+                    mdata.msg = gson.toJson(data1);
+                    broadcastMessage(mdata,data.type);
                 }
 
             });

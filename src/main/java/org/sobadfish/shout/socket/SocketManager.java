@@ -3,6 +3,8 @@ package org.sobadfish.shout.socket;
 
 
 import com.google.gson.Gson;
+import org.sobadfish.shout.ShoutPlugin;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -181,6 +183,8 @@ public class SocketManager {
 
         public String host;
 
+        public String name;
+
         public int port;
 
         public String msg;
@@ -197,6 +201,7 @@ public class SocketManager {
             } catch (UnknownHostException e) {
                 data.host = "Unknown Host";
             }
+            data.name = ShoutPlugin.getShoutPlugin().getConfig().getString("server.name",data.host);
             data.time = System.currentTimeMillis();
             Gson gson = new Gson();
             data.msg = gson.toJson(o);
