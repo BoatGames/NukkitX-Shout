@@ -129,6 +129,7 @@ public class ShoutPlugin extends PluginBase implements Listener {
     public static class MsgBroadcastData{
         public String msg;
 
+        public String world;
 
         public String player;
 
@@ -140,6 +141,7 @@ public class ShoutPlugin extends PluginBase implements Listener {
         String display = ShoutPlugin.getShoutPlugin().getConfig().getString("msg");
         display = display.replace("${ip}",msg.name)
                 .replace("${name}",data.player)
+                .replace("${world}",data.world)
                 .replace("${msg}", data.msg);
         final String s = display;
         switch (type.toLowerCase()){
@@ -216,28 +218,36 @@ public class ShoutPlugin extends PluginBase implements Listener {
                 }else{
                     player.sendMessage(TextFormat.colorize('&',TITLE+" &4您的金钱不足"));
                 }
-                MsgBroadcastData data1 = new MsgBroadcastData();
-                data1.msg = msg;
-                data1.player = player.getName();
-                data1.type = data.type;
-                if(socketManager != null){
-                    socketManager.sendMessage(data1);
-
-                }
-                if(socketManager == null || !socketManager.enable || socketManager.getType() == SocketManager.SocketType.SERVER){
-                    SocketManager.MessageData mdata = new SocketManager.MessageData();
-                    Gson gson = new Gson();
-                    mdata.name = getConfig().getString("server.name");
-                    mdata.msg = gson.toJson(data1);
-                    broadcastMessage(mdata,data.type);
-                }
+               sendMessage(player,msg,data.type);
 
             });
 
         }else{
-            sender.sendMessage(TextFormat.colorize('&',TITLE+"请不要在控制台执行"));
+            sendMessage(sender,args[0],"msg");
         }
         return super.onCommand(sender, command, label, args);
+    }
+
+    public void sendMessage(CommandSender player,String msg,String type){
+        MsgBroadcastData data1 = new MsgBroadcastData();
+        data1.msg = msg;
+        data1.world = ShoutPlugin.getShoutPlugin().getConfig().getString("server.name");
+        if(player instanceof Player){
+            data1.world = ((Player) player).getLevel().getFolderName();
+        }
+        data1.player = player.getName();
+        data1.type = type;
+        if(socketManager != null){
+            socketManager.sendMessage(data1);
+
+        }
+        if(socketManager == null || !socketManager.enable || socketManager.getType() == SocketManager.SocketType.SERVER){
+            SocketManager.MessageData mdata = new SocketManager.MessageData();
+            Gson gson = new Gson();
+            mdata.name = getConfig().getString("server.name");
+            mdata.msg = gson.toJson(data1);
+            broadcastMessage(mdata,type);
+        }
     }
 
 

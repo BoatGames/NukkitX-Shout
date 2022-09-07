@@ -208,7 +208,7 @@ public class SocketManager {
             data.name = ShoutPlugin.getShoutPlugin().getConfig().getString("server.name");
             data.time = System.currentTimeMillis();
             Gson gson = new Gson();
-            data.msg = new String(gson.toJson(o).getBytes(StandardCharsets.UTF_8));
+            data.msg = gson.toJson(o);
             return data;
         }
 
