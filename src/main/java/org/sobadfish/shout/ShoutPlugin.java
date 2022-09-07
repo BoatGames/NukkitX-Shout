@@ -234,20 +234,23 @@ public class ShoutPlugin extends PluginBase implements Listener {
         data1.world = ShoutPlugin.getShoutPlugin().getConfig().getString("server.name");
         if(player instanceof Player){
             data1.world = ((Player) player).getLevel().getFolderName();
+            data1.player = player.getName();
+        }else{
+            data1.player = "";
         }
-        data1.player = player.getName();
+
         data1.type = type;
         if(socketManager != null){
             socketManager.sendMessage(data1);
 
         }
-        if(socketManager == null || !socketManager.enable || socketManager.getType() == SocketManager.SocketType.SERVER){
-            SocketManager.MessageData mdata = new SocketManager.MessageData();
-            Gson gson = new Gson();
-            mdata.name = getConfig().getString("server.name");
-            mdata.msg = gson.toJson(data1);
-            broadcastMessage(mdata,type);
-        }
+
+        SocketManager.MessageData mdata = new SocketManager.MessageData();
+        Gson gson = new Gson();
+        mdata.name = getConfig().getString("server.name");
+        mdata.msg = gson.toJson(data1);
+        broadcastMessage(mdata,type);
+
     }
 
 
