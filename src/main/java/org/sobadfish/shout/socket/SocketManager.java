@@ -10,11 +10,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 
 /**
  * Socket 通信控制
@@ -63,8 +63,9 @@ public class SocketManager {
         this.sockets = new CopyOnWriteArrayList<>();
         port = serverSocket.getLocalPort();
         type = SocketType.SERVER;
-        enable();
         enable = true;
+        enable();
+
         connect();
 
 
@@ -138,8 +139,10 @@ public class SocketManager {
                 }
                 break;
             case SERVER:
-                for(SocketNode node: sockets){
-                    node.sendMessage(messageData);
+                if(sockets.size() > 0) {
+                    for (SocketNode node : sockets) {
+                        node.sendMessage(messageData);
+                    }
                     return true;
                 }
                 break;
@@ -164,6 +167,7 @@ public class SocketManager {
                         }
                     }
                 } catch (IOException e) {
+
                     if(socket != null){
                         System.out.println(socket.getInetAddress()+":"+socket.getPort()+"断开连接");
                     }
@@ -199,18 +203,24 @@ public class SocketManager {
                 data.host = addr.getHostAddress();
 
             } catch (UnknownHostException e) {
-                data.host = "Unknown Host";
+                data.host =  "Unknown Host";
             }
-            data.name = ShoutPlugin.getShoutPlugin().getConfig().getString("server.name",data.host);
+            data.name = ShoutPlugin.getShoutPlugin().getConfig().getString("server.name");
             data.time = System.currentTimeMillis();
             Gson gson = new Gson();
-            data.msg = gson.toJson(o);
+            data.msg = new String(gson.toJson(o).getBytes(StandardCharsets.UTF_8));
             return data;
         }
 
         public <T> T getData(Class<T> data){
             Gson gson = new Gson();
             return gson.fromJson(msg,data);
+        }
+
+        @Override
+        public String toString() {
+            Gson gson = new Gson();
+            return gson.toJson(this);
         }
     }
 
@@ -332,7 +342,7 @@ public class SocketManager {
         private final int port;
 
         public String getIPAddress(){
-           return ip;
+            return ip;
         }
 
         public int getPort() {
@@ -387,16 +397,18 @@ public class SocketManager {
                     byte[] bytes = new byte[1024];
                     inputStream.read(bytes,0,bytes.length);
                     String out = new String(bytes, StandardCharsets.UTF_8).trim();
-                    if(!out.trim().equalsIgnoreCase("") ){
-
+                    if(!"".equalsIgnoreCase(out.trim()) ){
                         MessageData data = gson.fromJson(out, MessageData.class);
                         PortBack portBack = data.getData(PortBack.class);
-                        if (portBack != null) {
+                        if (portBack != null && portBack.port > 0) {
                             SocketManager.port = portBack.port;
                             if (manager.connectListener != null) {
                                 manager.connectListener.join(this);
                             }
+                        }else{
+                            portBack = null;
                         }
+
                         // 判断是否为主机 如果是主机就把收到的数据分发给其他客户端
                         if (manager.type == SocketType.SERVER) {
                             for (SocketNode node : manager.sockets) {
@@ -410,6 +422,9 @@ public class SocketManager {
                             }
                         }
                         if (manager.dataListener != null) {
+                            if (portBack != null) {
+                                continue;
+                            }
                             manager.dataListener.handleMessage(manager, data);
                         }
 
@@ -419,33 +434,32 @@ public class SocketManager {
                     return false;
                 }
             }
-            if(socket.isClosed()){
-                // 进入这个判断后说明连接被关闭了
-                switch (manager.type){
-                    case SERVER:
-                        if(manager.connectListener != null){
-                            manager.connectListener.quit(this);
-                        }
-                        return false;
-                    case SOCKET:
-                        // 尝试重连主机
-                        int error = 0;
-                        while (error < 3){
-                            try {
+            // 进入这个判断后说明连接被关闭了
+            switch (manager.type){
+                case SERVER:
+                    if(manager.connectListener != null){
+                        manager.connectListener.quit(this);
+                    }
+                    return false;
+                case SOCKET:
+                    // 尝试重连主机
+                    int error = 0;
+                    while (error < 3){
+                        try {
 //
-                                socket = new Socket(socket.getInetAddress(), socket.getPort());
-                                // 重连完成
-                                break;
-                            }catch (Exception e) {
-                                error++;
-                            }
+                            socket = new Socket(socket.getInetAddress(), socket.getPort());
+                            // 重连完成
+                            break;
+                        }catch (Exception e) {
+                            error++;
                         }
-                        if(error >= 3){
-                            return false;
-                        }
+                    }
+                    if(error >= 3){
+                        return false;
+                    }
 
-                        break;
-                }
+                    break;
+                default:break;
             }
             return true;
 
@@ -468,7 +482,7 @@ public class SocketManager {
             if(isConnected()) {
                 messageData.port = port;
                 Gson gson = new Gson();
-                byte[] msg = gson.toJson(messageData).getBytes();
+                byte[] msg = gson.toJson(messageData).getBytes(StandardCharsets.UTF_8);
                 try {
                     if(outputStream != null){
                         outputStream.write(msg);
@@ -488,8 +502,12 @@ public class SocketManager {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
             SocketNode node = (SocketNode) o;
             return Objects.equals(socket, node.socket);
         }

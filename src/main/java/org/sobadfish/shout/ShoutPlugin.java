@@ -129,6 +129,7 @@ public class ShoutPlugin extends PluginBase implements Listener {
     public static class MsgBroadcastData{
         public String msg;
 
+
         public String player;
 
         public String type;
