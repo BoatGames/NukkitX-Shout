@@ -25,6 +25,12 @@
             <systemPath>${project.basedir}/lib/EconomyAPI_2.0.2.jar</systemPath>
 
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
 
     </dependencies>
 

@@ -49,6 +49,7 @@ public class ShoutPlugin extends PluginBase implements Listener {
     public void onEnable() {
         this.getLogger().info("正在加载全服喊话");
         shoutPlugin = this;
+        saveDefaultConfig();
         reloadConfig();
         getConfig();
         this.getServer().getPluginManager().registerEvents(new WindowsFrom(),this);
@@ -68,8 +69,8 @@ public class ShoutPlugin extends PluginBase implements Listener {
     }
 
     private void initConfig() {
-        saveResource("msg.json");
-        saveResource("shout.json");
+        saveResource("msg.json",false);
+        saveResource("shout.json",false);
         msgConfig = fileToClass(new File(this.getDataFolder()+"/msg.json"),MsgConfig.class);
         shoutConfig = fileToClass(new File(this.getDataFolder()+"/shout.json"),ShoutConfig.class);
     }
@@ -141,6 +142,7 @@ public class ShoutPlugin extends PluginBase implements Listener {
             case "title":
                 Server.getInstance().getOnlinePlayers().values().forEach(player1 -> player1.sendTitle(msg));
                 break;
+            default:break;
         }
     }
 
@@ -180,7 +182,7 @@ public class ShoutPlugin extends PluginBase implements Listener {
             from.displayWindow((Player)sender,shoutConfig);
             from.setFromDataListener((player, data) -> {
                 String msg = data.msg;
-                if(data.color.equalsIgnoreCase("无色彩")){
+                if("无色彩".equalsIgnoreCase(data.color)){
                     msg = TextUtils.clearColor(msg);
                 }
                 float money = shoutConfig.rate.msg * TextUtils.mathLine(msg);
@@ -192,6 +194,7 @@ public class ShoutPlugin extends PluginBase implements Listener {
                         money *= shoutConfig.rate.random;
                         msg = TextUtils.roundColor(msg);
                         break;
+                    default:break;
                 }
                 money *= shoutConfig.money;
                 if(moneyManager.myMoney(player.getName()) > money){

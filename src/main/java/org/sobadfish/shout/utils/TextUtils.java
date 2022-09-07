@@ -45,6 +45,6 @@ public class TextUtils {
      * @return 移除后的
      * */
     public static int mathLine(String str){
-        return str.split("\\n").length;
+        return str.length();
     }
 }

@@ -1,7 +1,7 @@
 {
   "msg": {
     "title": "喊话系统操作提示",
-    "subTitle": "&e喊话前使用\"&6/shout money\" &e来查看相关费用",
+    "subTitle": "&e喊话前使用''&6/shout money' &e来查看相关费用",
     "input": "请输入想要喊话的内容",
     "chose": {
       "title": "喊话内容显示的颜色",
@@ -16,8 +16,7 @@
       "list": [
         "Msg",
         "Tip",
-        "Popup",
-        "Title"
+        "Popup"
       ]
     }
 

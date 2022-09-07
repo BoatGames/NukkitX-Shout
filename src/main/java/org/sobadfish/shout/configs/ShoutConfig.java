@@ -1,46 +1,54 @@
 package org.sobadfish.shout.configs;
 
+import com.google.gson.annotations.SerializedName;
+import lombok.Data;
+
 import java.util.List;
+
 
 public class ShoutConfig {
 
-    public Cfg msg;
+    public MsgDTO msg;
 
-    public double money;
+    public int money;
 
-    public Rate rate;
+    public RateDTO rate;
 
-    public static class Rate{
-        public float msg;
+    public static class MsgDTO {
 
-        public float custom;
-
-        public float random;
-
-
-    }
-
-    public static class Cfg{
         public String title;
 
         public String subTitle;
 
         public String input;
 
-        public FromChose chose;
+        public ChoseDTO chose;
+
+        public Chose1DTO chose1;
 
 
-        public FromChose chose1;
+        public static class ChoseDTO {
 
-
-        public static class FromChose{
             public String title;
 
             public List<String> list;
         }
 
 
+        public static class Chose1DTO {
 
+            public String title;
+
+            public List<String> list;
+        }
     }
 
+    public static class RateDTO {
+
+        public Integer msg;
+
+        public Integer custom;
+
+        public Double random;
+    }
 }
