@@ -18,6 +18,7 @@ import org.sobadfish.shout.utils.TextUtils;
 
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,6 +46,8 @@ public class ShoutPlugin extends PluginBase implements Listener {
 
     private ShoutConfig shoutConfig;
 
+    private WindowsFrom windowsFrom;
+
     @Override
     public void onEnable() {
         this.getLogger().info("正在加载全服喊话");
@@ -52,7 +55,8 @@ public class ShoutPlugin extends PluginBase implements Listener {
         saveDefaultConfig();
         reloadConfig();
         getConfig();
-        this.getServer().getPluginManager().registerEvents(new WindowsFrom(),this);
+        windowsFrom = new WindowsFrom();
+        this.getServer().getPluginManager().registerEvents(windowsFrom,this);
         this.getLogger().info(TextFormat.AQUA+" _   _   _   _____   _   _   _____   _   _   _____  ");
         this.getLogger().info(TextFormat.AQUA+"| | | | | | /  ___/ | | | | /  _  \\ | | | | |_   _| ");
         this.getLogger().info(TextFormat.AQUA+"| | | | | | | |___  | |_| | | | | | | | | |   | |   ");
@@ -131,16 +135,16 @@ public class ShoutPlugin extends PluginBase implements Listener {
     public void broadcastMessage(String msg,String type){
         switch (type.toLowerCase()){
             case "msg":
-                Server.getInstance().broadcastMessage(msg);
+                Server.getInstance().broadcastMessage(TextFormat.colorize('&',msg));
                 break;
             case "tip":
-                Server.getInstance().getOnlinePlayers().values().forEach(player1 -> player1.sendTip(msg));
+                Server.getInstance().getOnlinePlayers().values().forEach(player1 -> player1.sendTip(TextFormat.colorize('&',msg)));
                 break;
             case "popup":
-                Server.getInstance().getOnlinePlayers().values().forEach(player1 -> player1.sendPopup(msg));
+                Server.getInstance().getOnlinePlayers().values().forEach(player1 -> player1.sendPopup(TextFormat.colorize('&',msg)));
                 break;
             case "title":
-                Server.getInstance().getOnlinePlayers().values().forEach(player1 -> player1.sendTitle(msg));
+                Server.getInstance().getOnlinePlayers().values().forEach(player1 -> player1.sendTitle(TextFormat.colorize('&',msg)));
                 break;
             default:break;
         }
@@ -150,7 +154,7 @@ public class ShoutPlugin extends PluginBase implements Listener {
         Gson gson = new Gson();
         InputStreamReader reader = null;
         try {
-            reader = new InputStreamReader(new FileInputStream(file));
+            reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8);
             return gson.fromJson(reader,tClass);
         } catch (IOException e) {
             this.getLogger().error("无法读取 "+file.getName()+" 配置文件");
@@ -178,10 +182,10 @@ public class ShoutPlugin extends PluginBase implements Listener {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if(sender.isPlayer()){
-            WindowsFrom from = new WindowsFrom();
-            from.displayWindow((Player)sender,shoutConfig);
-            from.setFromDataListener((player, data) -> {
-                String msg = data.msg;
+
+            windowsFrom.displayWindow((Player)sender,shoutConfig);
+            windowsFrom.setFromDataListener((player, data) -> {
+                String msg = TextFormat.colorize('&',data.msg);
                 if("无色彩".equalsIgnoreCase(data.color)){
                     msg = TextUtils.clearColor(msg);
                 }
@@ -190,7 +194,7 @@ public class ShoutPlugin extends PluginBase implements Listener {
                     case "自定义":
                         money *= shoutConfig.rate.custom;
                         break;
-                    case "&d随机颜色":
+                    case "§c随§6机§e颜§a色":
                         money *= shoutConfig.rate.random;
                         msg = TextUtils.roundColor(msg);
                         break;
@@ -199,9 +203,9 @@ public class ShoutPlugin extends PluginBase implements Listener {
                 money *= shoutConfig.money;
                 if(moneyManager.myMoney(player.getName()) > money){
                     moneyManager.reduceMoney(player.getName(),money);
-                    player.sendMessage(TITLE+" &2成功花费 &7"+money+" &2进行了一次喊话");
+                    player.sendMessage(TextFormat.colorize('&',TITLE+" &2成功花费 &7"+money+" &2进行了一次喊话"));
                 }else{
-                    player.sendMessage(TITLE+" &4您的金钱不足");
+                    player.sendMessage(TextFormat.colorize('&',TITLE+" &4您的金钱不足"));
                 }
                 if(socketManager != null){
                     MsgBroadcastData data1 = new MsgBroadcastData();

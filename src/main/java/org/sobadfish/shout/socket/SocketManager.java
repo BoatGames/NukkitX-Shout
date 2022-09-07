@@ -141,6 +141,7 @@ public class SocketManager {
                     return true;
                 }
                 break;
+            default:break;
         }
         return false;
     }
@@ -196,7 +197,7 @@ public class SocketManager {
             } catch (UnknownHostException e) {
                 data.host = "Unknown Host";
             }
-            data.time = new Date().getTime();
+            data.time = System.currentTimeMillis();
             Gson gson = new Gson();
             data.msg = gson.toJson(o);
             return data;
